@@ -131,6 +131,15 @@ async function init() {
     state.categories = dirs.map((d, i) => ({ id: d.id, name: d.name, color: colorFor(d.name, i) }));
     renderTabs();
     selectCategory(state.categories[0]);
+
+    // Fill in folder counts for every tab up front, not just the active one.
+    state.categories.forEach(cat => {
+      listSubfolders(cat.id).then(subdirs => {
+        const tabBtn = [...els.tabs.children].find(t => t.dataset.id === cat.id);
+        const countEl = tabBtn?.querySelector("[data-count]");
+        if (countEl) countEl.textContent = `${subdirs.length} folder${subdirs.length === 1 ? "" : "s"}`;
+      }).catch(() => {});
+    });
   } catch (err) {
     handleError(err);
   }
